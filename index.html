@@ -91,8 +91,11 @@ function card(i){
  return `<article class="review ${esc(i.kind)}"><div class="cardhead"><div><div class="titleline"><span class="badge">${labels[i.kind]}</span><h3>${esc(i.title)}</h3>${priorityBadge(i.priority)}</div><div class="loc">${esc(i.sheet)}<span class="cell">${esc(i.location)}</span><span class="usage">适用：${esc(i.usage||'内部设计说明')}</span></div></div>${hasCells?'':`<button class="copy" data-copy-item="${esc(i.id)}">复制处理方案</button>`}</div><div class="comparison"><div class="col original"><div class="label">原文</div><div class="copytext">${highlighted(i)}</div></div><div class="col proposal"><div class="label">${i.handling&&!hasCells?'处理方案':'建议文本'}</div>${replacementBlocks(i)}${i.lengthNote?`<div class="length-note">${esc(i.lengthNote)}</div>`:''}</div></div><div class="reason"><strong>修改理由</strong>${esc(i.reason)}${i.actionNote?`<div class="actionnote">${esc(i.actionNote)}</div>`:''}</div>${i.check?`<div class="pending"><b>待确认</b>　${esc(i.check)}</div>`:''}</article>`
 }
 function renderReviews(p){
- const all=scopeItems(p),rows=all.filter(matches);
- $('filters').innerHTML=[['all','全部'],...Object.entries(labels)].map(([k,l])=>`<button class="chip ${kind===k?'active':''}" data-kind="${k}" aria-pressed="${kind===k}">${l}<span class="count">${k==='all'?all.length:all.filter(i=>i.kind===k).length}</span></button>`).join('');
+ const all=scopeItems(p);
+ const categories=[['all','全部'],...Object.entries(labels)].filter(([k])=>k==='all'?all.length>0:all.some(i=>i.kind===k));
+ if(kind!=='all'&&!categories.some(([k])=>k===kind))kind='all';
+ const rows=all.filter(matches);
+ $('filters').innerHTML=categories.map(([k,l])=>`<button class="chip ${kind===k?'active':''}" data-kind="${k}" aria-pressed="${kind===k}">${l}<span class="count">${k==='all'?all.length:all.filter(i=>i.kind===k).length}</span></button>`).join('');
  $('resultCount').textContent=`${rows.length} / ${all.length} 条建议`;
  const cards=tab==='story'?rows.filter(i=>i.group==='引导配置'):rows;
  const names=[...new Set([...(groups[tab]||[]),...cards.map(i=>i.group)])];
